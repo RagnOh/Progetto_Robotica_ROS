@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+   <link name="base_link">
+     <!-- Default inertial for Gazebo/Ingnition - copy and edit block from 'common.xacro'
+          to get more realistic behaviour-->
+     <xacro:default_inertial/>
+     <visual>
+       <origin rpy="0 0 0" xyz="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/base_link.dae" scale="1 1 1"/>
+       </geometry>
+     </visual>
+     <collision>
+       <origin rpy="0 0 0" xyz="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/base_link.dae" />
+       </geometry>
+     </collision>
+   </link>
+   <!-- link 1 -->
+   <link name="link1">
+     <!-- Default inertial for Gazebo/Ingnition - copy and edit block from 'common.xacro'
+          to get more realistic behaviour-->
+     <xacro:default_inertial/>
+     <visual>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J1.dae"/>
+       </geometry>
+     </visual>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J1.dae" />
+       </geometry>
+     </collision>
+   </link>
+   <!-- link 2 -->
+   <link name="link2">
+     <!-- Default inertial for Gazebo/Ingnition - copy and edit block from 'common.xacro'
+          to get more realistic behaviour-->
+     <xacro:default_inertial/>
+     <visual>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J2.dae" />
+       </geometry>
+     </visual>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J2.dae"  />
+       </geometry>
+     </collision>
+   </link>
+   <!-- link 3 -->
+   <link name="link3">
+     <!-- Default inertial for Gazebo/Ingnition - copy and edit block from 'common.xacro'
+          to get more realistic behaviour-->
+     <xacro:default_inertial/>
+     <visual>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J3.dae" />
+       </geometry>
+     </visual>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J3.dae"  />
+       </geometry>
+     </collision>
+   </link>
+   <!-- link 4 -->
+   <link name="link4">
+     <!-- Default inertial for Gazebo/Ingnition - copy and edit block from 'common.xacro'
+          to get more realistic behaviour-->
+     <xacro:default_inertial/>
+     <visual>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J4.dae" />
+       </geometry>
+     </visual>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J4.dae"  />
+       </geometry>
+     </collision>
+   </link>
+   <!-- link 5 -->
+   <link name="link5">
+     <!-- Default inertial for Gazebo/Ingnition - copy and edit block from 'common.xacro'
+          to get more realistic behaviour-->
+     <xacro:default_inertial/>
+     <visual>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J5.dae" />
+       </geometry>
+     </visual>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J5.dae" />
+       </geometry>
+     </collision>
+    
+     
+   </link>
+   <!-- link 6 -->
+   <link name="link6">
+     <!-- Default inertial for Gazebo/Ingnition - copy and edit block from 'common.xacro'
+          to get more realistic behaviour-->
+     <xacro:default_inertial/>
+     <visual>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J6.dae" />
+       </geometry>
+     </visual>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 0 0" />
+       <geometry>
+         <mesh filename="package://denso_robot_description/meshes/denso_robot/visual/J6.dae" />
+       </geometry>
+     </collision>
+   </link>
+  
+   <!--gripper_base -->
+   
+ 
+ 
+ 
+
+
+   <!-- All-zero tool frame. This frame should correspond to the TOOL frame of the robot's controller.) -->
+  
+   <!-- tool link -->
+   <link name="camera_link">
+   <collision>
+     <origin xyz="0 0 0" rpy="0 0 1.5"/>
+     <geometry>
+   <box size="${camera_link} ${camera_link} ${camera_link}"/>
+     </geometry>
+   </collision>
+
+
+   <visual>
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <geometry>
+   <box size="${camera_link} ${camera_link} ${camera_link}"/>
+     </geometry>
+     <material name="red"/>
+   </visual>
+
+
+   <inertial>
+     <mass value="1e-5" />
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+   </inertial>
+  
+ </link>
+
+
+   <!-- END LINKS -->
+
+
+   <!-- JOINTS -->
+   <!-- base_joint fixes base_link to the environment -->
+   <joint name="base_joint" type="fixed">
+     <xacro:insert_block name="origin" />
+     <parent link="${parent}" />
+     <child link="base_link" />
+   </joint>
+   <!-- joint 1 -->
+   <joint name="joint1" type="revolute">
+     <origin xyz="0 0 0" rpy="0 0 0" />
+     <parent link="base_link" />
+     <child link="link1" />
+     <axis xyz="-0 -0 1" />
+     <limit effort="1000" lower="-6.2831" upper="6.2831" velocity="${radians(10)}" />
+     <dynamics damping="0.001" friction="0.61"/>
+   </joint>
+   <!-- joint 2 -->
+   <joint name="joint2" type="revolute">
+     <origin xyz="0 0 0.18" rpy="0 0 0" />
+     <parent link="link1" />
+     <child link="link2" />
+     <axis xyz="-0 1 -0" />
+     <limit effort="1000" lower="-1.91986" upper="1.91986" velocity="${radians(300)}" />
+     <dynamics damping="0.001" friction="0.61"/>
+   </joint>
+   <!-- joint 3 -->
+   <joint name="joint3" type="revolute">
+     <origin xyz="0 0 0.165" rpy="0 0 0" />
+     <parent link="link2" />
+     <child link="link3" />
+     <axis xyz="0 1 0" />
+     <limit effort="1000" lower="-2.268" upper="2.268" velocity="${radians(408)}" />
+     <dynamics damping="0.001" friction="0.61"/>
+   </joint>
+   <!-- joint 4 -->
+   <joint name="joint4" type="revolute">
+     <origin xyz="-0.012 0.02 0.088" rpy="0 0 0" />
+     <parent link="link3" />
+     <child link="link4" />
+     <axis xyz="-0 -0 1" />
+     <limit effort="1000" lower="-4.712" upper="4.712" velocity="${radians(540)}" />
+     <dynamics damping="0.001" friction="0.61"/>
+   </joint>
+   <!-- joint 5 -->
+   <joint name="joint5" type="revolute">
+     <origin xyz="0 -0.02 0.0895" rpy="0 0 0" />
+     <parent link="link4" />
+     <child link="link5" />
+     <axis xyz="0 1 0" />
+     <limit effort="1000" lower="-6.2831" upper="6.2831" velocity="${radians(540)}" />
+     <dynamics damping="0.001" friction="0.67"/>
+   </joint>
+   <!-- joint 6 -->
+   <joint name="joint6" type="revolute">
+     <origin xyz="0 -0.0445 0.042" rpy="0 0 0" />
+     <parent link="link5" />
+     <child link="link6" />
+     <axis xyz="0 0 1" />
+     <limit effort="1000" lower="-6.2831" upper="6.2831" velocity="${radians(864)}" />
+     <dynamics damping="0.001" friction="0.67"/>
+   </joint>
+  
+  
+ 
+ 
+
+  
+   <joint name="camera_joint" type="fixed">
+   <axis xyz="0 1 0" />
+   <origin xyz="-0.05 -0.04 0.02" rpy="0 -1.5 0"/>
+   <parent link="link5"/>
+   <child link="camera_link"/>
+ </joint>
+   
+  
+
+
+
+
+
+   
+  
+  
+
+
+ 
+</robot>
