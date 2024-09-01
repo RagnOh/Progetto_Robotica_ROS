@@ -71,7 +71,8 @@ class controlNode(Node):
 
         #print(self.actual_position)
         if not self.calcolatore.compare_positions(self.posizione_inviata,self.actual_position):
-           #print("ok")    
+           print(self.posizione_inviata)
+           print(self.actual_position)    
            self.raggiunto = True
         #self.get_logger().info(f"Posizione raggiunta: {self.position_reached}")
 
@@ -84,6 +85,7 @@ class controlNode(Node):
           print(self.next_position[1])
           self.posizione_pezzo.append(self.next_position[0])
           self.posizione_pezzo.append(self.next_position[1])
+          #self.colore_pezzo = self.next_position[2]
           self.get_logger().info(f"Nuova posizione ricevuta: {self.next_position[0]}")
 
     def move_to_position(self, position):
@@ -118,13 +120,41 @@ class controlNode(Node):
         self.move_to_position(pos3)    
         self.raggiunto = False
         self.stato = 2
+        time.sleep(2)
 
     def stato3(self):  
         self.calcolatore.chiudi_pinza()
-        pos4 = self.calcolatore.get_angoli(self.posizione_pezzo_x,self.posizione_pezzo_y,controlNode.Z_RECUPERO)
-        self.move_to_position(pos4)    
+        self.pos4 = self.calcolatore.get_angoli(self.posizione_pezzo_x,self.posizione_pezzo_y,controlNode.Z_RECUPERO)
+        self.pos4[6] = 0.1
+        print(self.pos4)
+        self.move_to_position(self.pos4)    
         self.raggiunto = False
         self.stato = 3
+        time.sleep(5)
+
+    def stato4(self):
+        print(self.pos4)
+        self.pos4[1] = 6.28#-2.27
+        self.pos4[3] = -1.4
+        self.move_to_position(self.pos4)  
+        self.raggiunto = False
+        self.stato = 4
+        time.sleep(6)
+        print(self.posizione_inviata)
+        print(self.actual_position)
+
+    def stato5(self):
+        print(self.pos4) 
+        self.pos4[7] = 1.0
+        self.pos4[8] = -1.0
+        self.move_to_position(self.pos4)  
+        self.raggiunto = False
+        time.sleep(3)  
+        self.stato = 5
+        
+
+
+
 
 
     def run(self):
@@ -165,18 +195,18 @@ class controlNode(Node):
                 self.stato2()
                 print("raggiunto stato2")   
 
-            if self.raggiunto and self.stato == 2:
+            if self.stato == 2:
                 
                 self.stato3()
                 print("raggiunto stato3")   
 
-            if self.raggiunto and self.stato == 3:
-                self.stato = 4
+            if  self.stato == 3:
+                
                 self.stato4()
                 print("raggiunto stato4")   
 
             if self.raggiunto and self.stato == 4:
-                self.stato = 5
+                
                 self.stato5()
                 print("raggiunto stato5")  
 
