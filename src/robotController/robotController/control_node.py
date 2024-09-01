@@ -35,12 +35,18 @@ class controlNode(Node):
         super().__init__('control_node')
 
         self.calcolatore = MoverController()
+        self.actual_position = []
+        self.pos1 = []
+        self.posizione_inviata = []
+        self.raggiunto = False
+        self.stato = 0
+        self.posizione_pezzo = []
         
         # Publisher per inviare la posizione desiderata
         self.position_pub = self.create_publisher(Float64MultiArray, '/forward_position_controller/commands', 10)
         
         # Subscriber per confermare quando il robot ha raggiunto la posizione desiderata
-        self.create_subscription(JointState, '/joint_states', self.position_reached_callback, 10)
+        self.create_subscription(JointState, '/joint_states', self.position_reached_callback, 1)
         
         # Subscriber per ricevere la nuova posizione
         self.create_subscription(Float32MultiArray, '/point_coordinates', self.next_position_callback, 10)
@@ -53,47 +59,101 @@ class controlNode(Node):
         # Callback per quando il robot ha raggiunto la posizione desiderata
         #self.position_reached = msg.data
         #print(self.position_reached)
-        print("r")
+        #print(msg.position)
+        #print("eseg")
+        self.actual_position= []
         for i in range(len(msg.position)):
-            self.get_logger().info('pos giunto %d: %f' % (i,msg.position[i]))
+            #self.get_logger().info('pos giunto %d: %f' % (i,msg.position[i]))
+            
+            self.actual_position.append(round(msg.position[i],2))
+
+        #print(self.actual_position)
+        if not self.calcolatore.compare_positions(self.posizione_inviata,self.actual_position):
+           print("ok")    
+           self.raggiunto = True
         #self.get_logger().info(f"Posizione raggiunta: {self.position_reached}")
 
     def next_position_callback(self, msg):
         # Callback per ottenere la prossima posizione
         self.next_position = msg.data
+        self.posizione_pezzo = []
+        print(self.next_position[0])
+        print(self.next_position[1])
+        self.posizione_pezzo.append(self.next_position[0])
+        self.posizione_pezzo.append(self.next_position[1])
         self.get_logger().info(f"Nuova posizione ricevuta: {self.next_position[0]}")
 
     def move_to_position(self, position):
         # Pubblica la posizione desiderata
         pos_msg = Float64MultiArray()
+        self.posizione_inviata = []
         pos_msg.data=[position[1],position[2],position[3],position[4],position[5],position[6],position[7],position[8]]
-        print(pos_msg)
+        #print(pos_msg)
+        self.posizione_inviata = [round(position[1],2),round(position[2],2),round(position[3],2),round(position[4],2),round(position[5],2),round(position[6],2),round(position[7],2),round(position[8],2)]
         self.position_pub.publish(pos_msg)
         self.get_logger().info(f"Posizione inviata: {position}")
+    
+    def stato1():
+        pos2 = self.calcolatore.calcolo_angolo_giunti(self.posizione_pezzo[0],self.posizione_pezzo[1],controlNode.Z_APPROCH)
+        self.move_to_position(self.pos2)
+
+    def stato2():
+        pos3 = self.calcolatore.calcolo_angolo_giunti(self.posizione_pezzo[0],self.posizione_pezzo[1],controlNode.Z_RECUPERO)
+        self.move_to_position(self.pos3)    
 
     def run(self):
         # Loop principale
         rate = self.create_rate(10)  # Frequenza del ciclo in Hz
-        pos1= self.calcolatore.calcolo_angolo_giunti(controlNode.X_PHOTO,controlNode.Y_PHOTO,controlNode.Z_PHOTO)
-        pos1.append(0.0)
-        pos1.append(0.0)
-        pos1[4]=0.0
+        self.pos1= self.calcolatore.calcolo_angolo_giunti(controlNode.X_PHOTO,controlNode.Y_PHOTO,controlNode.Z_PHOTO)
+        self.pos1.append(0.0)
+        self.pos1.append(0.0)
+        self.pos1[4]=0.0
+
+        
+
         
         #Raggiungo posizione foto
-        #self.move_to_position(pos1)
+        self.move_to_position(self.pos1)
+
 
         #Controllo se posizione raggiunta
 
-        #while rclpy.ok():
-            #if self.position_reached and self.next_position:
+           
+
+        while rclpy.ok():
+            if self.raggiunto and self.stato == 0:
+                self.stato = 1
+                self.stato1()
+                print("raggiunto stato1") 
                 # Se il robot ha raggiunto la posizione e c'è una nuova posizione, muovi il robot
               #  self.move_to_position(self.next_position)
-                
-                # Reset delle variabili
-               ## self.position_reached = False
-               # self.next_position = None
+            if self.raggiunto and self.stato == 1:
+                self.stato = 2
+                self.stato2()
+                print("raggiunto stato2")   
 
-        #rclpy.spin_once(self, timeout_sec=0.1)
+            if self.raggiunto and self.stato == 2:
+                self.stato = 3
+                self.stato3()
+                print("raggiunto stato3")   
+
+            if self.raggiunto and self.stato == 3:
+                self.stato = 4
+                self.stato4()
+                print("raggiunto stato4")   
+
+            if self.raggiunto and self.stato == 4:
+                self.stato = 5
+                self.stato5()
+                print("raggiunto stato5")  
+
+            if self.stato == 5:
+                self.move_to_position(self.pos1)
+                self.stato = 0
+                print("finito")  
+
+
+            rclpy.spin_once(self, timeout_sec=0.1)
 
 def main(args=None):
     rclpy.init(args=args)

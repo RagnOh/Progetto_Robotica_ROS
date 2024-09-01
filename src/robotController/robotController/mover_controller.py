@@ -26,7 +26,41 @@ class MoverController:
 
         return computed_position
 
-    def compare_positions(self,desidered_pos,real_pos):
+    def compare_positions(self,desidered_pos,actual_pos):
+        
+        #print(len(desidered_pos)) 
+        #print(actual_pos)
+        #print(desidered_pos)
+        #print(len(actual_pos))  
+         
+        if len(actual_pos)<8:
+            print("l1")
+            return True
+        if len(desidered_pos)<8:
+            print("l2")
+            return True    
+          
 
-        return True    
+        if desidered_pos[2]!=actual_pos[0]:
+            print(desidered_pos[0])
+            print(actual_pos[2]) 
+            return True
+
+          
+        if desidered_pos[0]!=actual_pos[1]:
+            return True
+
+        if desidered_pos[4]!=actual_pos[3]:
+            return True
+
+        if desidered_pos[1]!=actual_pos[6]:
+            return True
+
+        if desidered_pos[4]!=actual_pos[3]:
+            return True           
+
+        #if desidered_pos[5]!=actual_pos[5]:
+        #    return True          
+        
+        return False   
 
