@@ -28,7 +28,7 @@ class controlNode(Node):
 
     #Coordinate recupero pezzo
     Z_APPROCH = 0.15
-    Z_RECUPERO = 0.1
+    Z_RECUPERO = 0.08
 
 
     def __init__(self):
@@ -39,8 +39,10 @@ class controlNode(Node):
         self.pos1 = []
         self.posizione_inviata = []
         self.raggiunto = False
+        self.take_photo = False
         self.stato = 0
         self.posizione_pezzo = []
+        
         
         # Publisher per inviare la posizione desiderata
         self.position_pub = self.create_publisher(Float64MultiArray, '/forward_position_controller/commands', 10)
@@ -69,7 +71,7 @@ class controlNode(Node):
 
         #print(self.actual_position)
         if not self.calcolatore.compare_positions(self.posizione_inviata,self.actual_position):
-           print("ok")    
+           #print("ok")    
            self.raggiunto = True
         #self.get_logger().info(f"Posizione raggiunta: {self.position_reached}")
 
@@ -77,11 +79,12 @@ class controlNode(Node):
         # Callback per ottenere la prossima posizione
         self.next_position = msg.data
         self.posizione_pezzo = []
-        print(self.next_position[0])
-        print(self.next_position[1])
-        self.posizione_pezzo.append(self.next_position[0])
-        self.posizione_pezzo.append(self.next_position[1])
-        self.get_logger().info(f"Nuova posizione ricevuta: {self.next_position[0]}")
+        if (len(self.next_position)!=0) and self.take_photo:
+          print(self.next_position[0])
+          print(self.next_position[1])
+          self.posizione_pezzo.append(self.next_position[0])
+          self.posizione_pezzo.append(self.next_position[1])
+          self.get_logger().info(f"Nuova posizione ricevuta: {self.next_position[0]}")
 
     def move_to_position(self, position):
         # Pubblica la posizione desiderata
@@ -91,22 +94,45 @@ class controlNode(Node):
         #print(pos_msg)
         self.posizione_inviata = [round(position[1],2),round(position[2],2),round(position[3],2),round(position[4],2),round(position[5],2),round(position[6],2),round(position[7],2),round(position[8],2)]
         self.position_pub.publish(pos_msg)
-        self.get_logger().info(f"Posizione inviata: {position}")
+        #self.get_logger().info(f"Posizione inviata: {position}")
     
-    def stato1():
-        pos2 = self.calcolatore.calcolo_angolo_giunti(self.posizione_pezzo[0],self.posizione_pezzo[1],controlNode.Z_APPROCH)
-        self.move_to_position(self.pos2)
+    def stato1(self):
+        print("camera:")
+        self.calcolatore.apri_pinza()
+        
+        print(self.posizione_pezzo)
+        if (len(self.posizione_pezzo)!=0):
+         print(round(self.posizione_pezzo[0],1))
+         print(round(self.posizione_pezzo[1],1))
+         pos2 = self.calcolatore.get_angoli(round(self.posizione_pezzo[0],1),round(self.posizione_pezzo[1],1),controlNode.Z_APPROCH)
+         self.posizione_pezzo_x = round(self.posizione_pezzo[0],1)
+         self.posizione_pezzo_y = round(self.posizione_pezzo[1],1)
+         print(pos2)
+         self.move_to_position(pos2)
+         self.raggiunto = False
+         self.stato = 1
+         self.take_photo = False
 
-    def stato2():
-        pos3 = self.calcolatore.calcolo_angolo_giunti(self.posizione_pezzo[0],self.posizione_pezzo[1],controlNode.Z_RECUPERO)
-        self.move_to_position(self.pos3)    
+    def stato2(self):
+        pos3 = self.calcolatore.get_angoli(self.posizione_pezzo_x,self.posizione_pezzo_y,controlNode.Z_RECUPERO)
+        self.move_to_position(pos3)    
+        self.raggiunto = False
+        self.stato = 2
+
+    def stato3(self):  
+        self.calcolatore.chiudi_pinza()
+        pos4 = self.calcolatore.get_angoli(self.posizione_pezzo_x,self.posizione_pezzo_y,controlNode.Z_RECUPERO)
+        self.move_to_position(pos4)    
+        self.raggiunto = False
+        self.stato = 3
+
 
     def run(self):
         # Loop principale
         rate = self.create_rate(10)  # Frequenza del ciclo in Hz
-        self.pos1= self.calcolatore.calcolo_angolo_giunti(controlNode.X_PHOTO,controlNode.Y_PHOTO,controlNode.Z_PHOTO)
-        self.pos1.append(0.0)
-        self.pos1.append(0.0)
+        self.pos1= self.calcolatore.get_angoli(controlNode.X_PHOTO,controlNode.Y_PHOTO,controlNode.Z_PHOTO)
+        #self.pos1.append(0.0)
+        #self.pos1.append(0.0)
         self.pos1[4]=0.0
 
         
@@ -116,24 +142,31 @@ class controlNode(Node):
         self.move_to_position(self.pos1)
 
 
-        #Controllo se posizione raggiunta
+       
 
            
 
         while rclpy.ok():
+
             if self.raggiunto and self.stato == 0:
-                self.stato = 1
+                
+                self.take_photo = True
                 self.stato1()
+                
                 print("raggiunto stato1") 
-                # Se il robot ha raggiunto la posizione e c'è una nuova posizione, muovi il robot
-              #  self.move_to_position(self.next_position)
+
+            if self.stato == 0 and not self.raggiunto:
+                self.move_to_position(self.pos1)
+                
+
+                
             if self.raggiunto and self.stato == 1:
-                self.stato = 2
+                
                 self.stato2()
                 print("raggiunto stato2")   
 
             if self.raggiunto and self.stato == 2:
-                self.stato = 3
+                
                 self.stato3()
                 print("raggiunto stato3")   
 
@@ -151,6 +184,8 @@ class controlNode(Node):
                 self.move_to_position(self.pos1)
                 self.stato = 0
                 print("finito")  
+
+                
 
 
             rclpy.spin_once(self, timeout_sec=0.1)

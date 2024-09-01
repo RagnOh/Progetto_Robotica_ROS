@@ -8,6 +8,8 @@ class MoverController:
     def __init__(self):
 
         self.my_chain = ikpy.chain.Chain.from_urdf_file(MoverController.NOME_FILE,active_links_mask=[False,True,True,True,True,True,True])
+        self.pinza_sx = 0.0
+        self.pinza_dx = 0.0
 
 
     def calcolo_angolo_giunti(self,x,y,z):
@@ -26,6 +28,21 @@ class MoverController:
 
         return computed_position
 
+    def get_angoli(self,x,y,z):
+        angoli = self.calcolo_angolo_giunti(x,y,z)
+        angoli.append(self.pinza_sx)
+        angoli.append(self.pinza_dx)
+
+        return angoli    
+
+    def apri_pinza(self):
+        self.pinza_sx = 1.0
+        self.pinza_dx = -1.0
+
+    def chiudi_pinza(self):
+        self.pinza_sx = 0.0
+        self.pinza_dx = 0.0    
+
     def compare_positions(self,desidered_pos,actual_pos):
         
         #print(len(desidered_pos)) 
@@ -34,16 +51,16 @@ class MoverController:
         #print(len(actual_pos))  
          
         if len(actual_pos)<8:
-            print("l1")
+            #print("l1")
             return True
         if len(desidered_pos)<8:
-            print("l2")
+            #print("l2")
             return True    
           
 
         if desidered_pos[2]!=actual_pos[0]:
-            print(desidered_pos[0])
-            print(actual_pos[2]) 
+           # print(desidered_pos[0])
+           # print(actual_pos[2]) 
             return True
 
           

@@ -35,20 +35,21 @@ class VideoSubscriber(Node):
             punto_camera=processatore.process_image(cv_image)
 
             calibrazione = Camera_Calibration()
-            punto_real = calibrazione.findRobotCoordinates(punto_camera[0],punto_camera[1])
+            if (len(punto_camera)!=0):
+             punto_real = calibrazione.findRobotCoordinates(punto_camera[0],punto_camera[1])
 
-            coord_msg = Float32MultiArray()
-            x_real = round(punto_real[0]/1000,2)
-            y_real = round(punto_real[1]/1000,2)
+             coord_msg = Float32MultiArray()
+             x_real = round(punto_real[0]/1000,2)
+             y_real = round(punto_real[1]/1000,2)
 
-            print(x_real)
-            print(y_real)
-            coord_msg.data = [punto_real[0], punto_real[1]]
-            self.publisher.publish(coord_msg)
+             print(x_real)
+             print(y_real)
+             coord_msg.data = [x_real, y_real]
+             self.publisher.publish(coord_msg)
             
 
-            cv2.imshow("Frame ogni minuto", cv_image)
-            cv2.waitKey(1)
+            #cv2.imshow("Frame ogni minuto", cv_image)
+            #cv2.waitKey(1)
 
 def main(args=None):
     rclpy.init(args=args)
