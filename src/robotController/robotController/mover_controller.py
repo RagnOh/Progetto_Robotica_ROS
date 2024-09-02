@@ -3,10 +3,11 @@ import ikpy.utils.plot as plot_utils
 
 class MoverController:
 
-    NOME_FILE = "./param4.urdf"
+    NOME_FILE = "./param4.urdf" #File urdf che descrive le posizioni ed i limiti dei giunti nel cobotta
 
     def __init__(self):
-
+        
+        #Inizializzo ikpy
         self.my_chain = ikpy.chain.Chain.from_urdf_file(MoverController.NOME_FILE,active_links_mask=[False,True,True,True,True,True,True])
         self.pinza_sx = 0.0
         self.pinza_dx = 0.0
@@ -16,12 +17,13 @@ class MoverController:
        
        
        target_position = [x,y,z]
-       target_orientation = [0,0,-1]
-
+       target_orientation = [0,0,-1] #In questo modo ho pinza parallela a suolo
+       #Calcolo angolo vari giunti del cobotta
        ik = self.my_chain.inverse_kinematics(target_position, target_orientation,orientation_mode="Z")
        
        return ik.tolist()
-
+    
+    #Da angoli giunti calcolo tramite cinematica diretta coordinate punto raggiunto
     def calcolo_coord_cartesiane(self,vet):
 
         computed_position = my_chain.forward_kinematics(ik)
@@ -43,6 +45,7 @@ class MoverController:
         self.pinza_sx = 0.0
         self.pinza_dx = 0.0    
 
+    #Comparo gli angoli dei giunti del robot nella posizione che voglio con quelli in cui si trovano ora
     def compare_positions(self,desidered_pos,actual_pos):
         
         #print(len(desidered_pos)) 

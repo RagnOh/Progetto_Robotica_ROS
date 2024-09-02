@@ -11,9 +11,10 @@ import time
 class VideoSubscriber(Node):
     def __init__(self):
         super().__init__('video_subscriber')
+        #Ascolto il topic
         self.subscription = self.create_subscription(
             Image,
-            '/camera',  # Sostituire con il nome del topic video
+            '/camera',  # Nome del topic video
             self.listener_callback,
             10)
         self.subscription  # Prevenire che venga eliminata
@@ -32,10 +33,12 @@ class VideoSubscriber(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             # Mostrare l'immagine
             processatore=RedRectangleDetector()
-            punto_camera=processatore.process_image(cv_image)
+            #Identifico il pezzo, il colore ed il centro per il recupero
+            punto_camera=processatore.process_image_colori(cv_image)
 
             calibrazione = Camera_Calibration()
             if (len(punto_camera)!=0):
+             #Cerco coordinate centro pezzo per il robot dato il centro nell'immagine catturata da camera   
              punto_real = calibrazione.findRobotCoordinates(punto_camera[0],punto_camera[1])
 
              coord_msg = Float32MultiArray()
@@ -44,7 +47,7 @@ class VideoSubscriber(Node):
 
              print(x_real)
              print(y_real)
-             coord_msg.data = [x_real, y_real]
+             coord_msg.data = [x_real, y_real,punto_camera[2]]
              self.publisher.publish(coord_msg)
             
 

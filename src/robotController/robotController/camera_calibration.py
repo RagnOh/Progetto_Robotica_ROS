@@ -27,12 +27,6 @@ class Camera_Calibration():
         x_centered=x_centered * -1.0
         y_centered=y_centered * -1.0
         
-        #print("cam")
-        #print(x_centered)
-        #print(self.pixRatio)
-        #print(y_centered)
-        
-
       
 
         #Scalo in base a rapporto pixels/mm

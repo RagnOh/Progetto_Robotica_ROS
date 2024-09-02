@@ -27,8 +27,8 @@ class controlNode(Node):
     Z_PHOTO = 0.2
 
     #Coordinate recupero pezzo
-    Z_APPROCH = 0.15
-    Z_RECUPERO = 0.08
+    Z_APPROCH = 0.15  #Valore altezza prima di recuperare il pezzo per evitare collisioni
+    Z_RECUPERO = 0.08 #Valore altezza per recuperare il pezzo adattato in base a calibrazione automatica
 
 
     def __init__(self):
@@ -42,6 +42,7 @@ class controlNode(Node):
         self.take_photo = False
         self.stato = 0
         self.posizione_pezzo = []
+        self.colore = 1 #1 se cubo rosso, 2 se blu
         
         
         # Publisher per inviare la posizione desiderata
@@ -53,16 +54,11 @@ class controlNode(Node):
         # Subscriber per ricevere la nuova posizione
         self.create_subscription(Float32MultiArray, '/point_coordinates', self.next_position_callback, 10)
         
-        # Variabili per memorizzare lo stato e la prossima posizione
-        self.position_reached = False
+        
         self.next_position = None
 
     def position_reached_callback(self, msg):
-        # Callback per quando il robot ha raggiunto la posizione desiderata
-        #self.position_reached = msg.data
-        #print(self.position_reached)
-        #print(msg.position)
-        #print("eseg")
+        
         self.actual_position= []
         for i in range(len(msg.position)):
             #self.get_logger().info('pos giunto %d: %f' % (i,msg.position[i]))
@@ -71,25 +67,25 @@ class controlNode(Node):
 
         #print(self.actual_position)
         if not self.calcolatore.compare_positions(self.posizione_inviata,self.actual_position):
-           print(self.posizione_inviata)
-           print(self.actual_position)    
-           self.raggiunto = True
+           #print(self.posizione_inviata)
+           #print(self.actual_position)    
+           self.raggiunto = True #Variabile per capire quando robot ha raggiunto posizione desiderata
         #self.get_logger().info(f"Posizione raggiunta: {self.position_reached}")
 
     def next_position_callback(self, msg):
-        # Callback per ottenere la prossima posizione
+        # Callback per ottenere la posizione del pezzo da raggiungere
         self.next_position = msg.data
         self.posizione_pezzo = []
         if (len(self.next_position)!=0) and self.take_photo:
-          print(self.next_position[0])
-          print(self.next_position[1])
+          #print(self.next_position[0])
+          #print(self.next_position[1])
           self.posizione_pezzo.append(self.next_position[0])
           self.posizione_pezzo.append(self.next_position[1])
-          #self.colore_pezzo = self.next_position[2]
-          self.get_logger().info(f"Nuova posizione ricevuta: {self.next_position[0]}")
+          self.colore = self.next_position[2]
+          #self.get_logger().info(f"Nuova posizione ricevuta: {self.next_position[0]}")
 
     def move_to_position(self, position):
-        # Pubblica la posizione desiderata
+        # Pubblica la posizione desiderata sul topic apposito facendo muovere il robot
         pos_msg = Float64MultiArray()
         self.posizione_inviata = []
         pos_msg.data=[position[1],position[2],position[3],position[4],position[5],position[6],position[7],position[8]]
@@ -98,20 +94,21 @@ class controlNode(Node):
         self.position_pub.publish(pos_msg)
         #self.get_logger().info(f"Posizione inviata: {position}")
     
+    #Comportamenti per ciascuno stato
     def stato1(self):
-        print("camera:")
+        #print("camera:")
         self.calcolatore.apri_pinza()
         
         print(self.posizione_pezzo)
         if (len(self.posizione_pezzo)!=0):
-         print(round(self.posizione_pezzo[0],1))
-         print(round(self.posizione_pezzo[1],1))
+         #print(round(self.posizione_pezzo[0],1))
+         #print(round(self.posizione_pezzo[1],1))
          pos2 = self.calcolatore.get_angoli(round(self.posizione_pezzo[0],1),round(self.posizione_pezzo[1],1),controlNode.Z_APPROCH)
          self.posizione_pezzo_x = round(self.posizione_pezzo[0],1)
          self.posizione_pezzo_y = round(self.posizione_pezzo[1],1)
-         print(pos2)
+         #print(pos2)
          self.move_to_position(pos2)
-         self.raggiunto = False
+         self.raggiunto = False 
          self.stato = 1
          self.take_photo = False
 
@@ -134,7 +131,10 @@ class controlNode(Node):
 
     def stato4(self):
         print(self.pos4)
-        self.pos4[1] = 6.28#-2.27
+        if self.colore == 1.0:
+         self.pos4[1] = 6.28#-2.27
+        if self.colore == 2.0:
+         self.pos4[1] = -4.70 
         self.pos4[3] = -1.4
         self.move_to_position(self.pos4)  
         self.raggiunto = False
@@ -164,23 +164,17 @@ class controlNode(Node):
         #self.pos1.append(0.0)
         #self.pos1.append(0.0)
         self.pos1[4]=0.0
-
         
-
-        
-        #Raggiungo posizione foto
-        self.move_to_position(self.pos1)
-
-
-       
-
-           
+        #Raggiungo posizione per raccogliere foto
+        self.move_to_position(self.pos1)        
 
         while rclpy.ok():
 
+            # Implementazione macchina a stati
+
             if self.raggiunto and self.stato == 0:
                 
-                self.take_photo = True
+                self.take_photo = True #Variabile per ottenere la foto solo quando il robot sarà nella posizione corretta
                 self.stato1()
                 
                 print("raggiunto stato1") 
@@ -215,10 +209,9 @@ class controlNode(Node):
                 self.stato = 0
                 print("finito")  
 
-                
-
-
             rclpy.spin_once(self, timeout_sec=0.1)
+
+
 
 def main(args=None):
     rclpy.init(args=args)
